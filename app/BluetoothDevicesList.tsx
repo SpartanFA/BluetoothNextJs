@@ -36,11 +36,14 @@ const BluetoothDevicesList: React.FC = () => {
         {isScanning ? 'Scanning...' : 'Scan for Bluetooth Devices'}
       </button>
       <ul>
-        {devices.map(device => (
-          <li key={device.id}>
-            {device.name || 'Unknown Device'} - ID: {device.id}
-          </li>
-        ))}
+        {devices.map(device => {
+          console.log(device.name); // Log the device to the console
+          return (
+            <li key={device.id}>
+              {'ic' || 'Unknown Device'} - ID: {device.gatt?.connected ? 'Connected' : 'Disconnected'}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
