@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Button from './button';
 import BluetoothDevicesList from './BluetoothDevicesList';
 
 const App: React.FC = () => {
