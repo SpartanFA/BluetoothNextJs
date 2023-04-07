@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
+interface DeviceWithServices {
+  device: BluetoothDevice;
+  serviceUUIDs: string[];
+}
+
 const BluetoothDevicesList: React.FC = () => {
-  const [devices, setDevices] = useState<BluetoothDevice[]>([]);
+  const [devices, setDevices] = useState<DeviceWithServices[]>([]);
   const [isScanning, setIsScanning] = useState(false);
 
   const scanForDevices = async () => {
@@ -14,9 +19,21 @@ const BluetoothDevicesList: React.FC = () => {
       setIsScanning(true);
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
+        optionalServices: ['*'],
       });
 
-      setDevices(prevDevices => [...prevDevices, device]);
+      const gattServer = await device.gatt?.connect();
+      const services = await gattServer?.getPrimaryServices();
+      const serviceUUIDs = services?.map(service => service.uuid) || [];
+
+      setDevices(prevDevices => [
+        ...prevDevices,
+        {
+          device,
+          serviceUUIDs,
+        },
+      ]);
+
       setIsScanning(false);
     } catch (error) {
       console.error('Error scanning for Bluetooth devices:', error);
@@ -36,8 +53,15 @@ const BluetoothDevicesList: React.FC = () => {
         {isScanning ? 'Scanning...' : 'Scan for Bluetooth Devices'}
       </button>
       <ul>
-        {devices.map(device => (
-          <li key={device.id}>{device.name || 'Unknown Device'}</li>
+        {devices.map(({ device, serviceUUIDs }) => (
+          <li key={device.id}>
+            {device.name || 'Unknown Device'}
+            <ul>
+              {serviceUUIDs.map(uuid => (
+                <li key={uuid}>{uuid}</li>
+              ))}
+            </ul>
+          </li>
         ))}
       </ul>
     </div>
